@@ -1,16 +1,21 @@
 box::use(
   shiny[
     NS, tagList, moduleServer, eventReactive, is.reactive, selectInput,
-    observeEvent, req, renderText, textOutput, reactiveVal
+    observeEvent, req, renderText, textOutput, reactiveVal, tags
   ],
-  shiny.fluent[...]
+  shiny.fluent[...],
+  glue[glue]
 )
 
 #' @export
 ui <- function(id) {
   ns <- NS(id)
   tagList(
-    DefaultButton.shinyInput(ns("show_panel"), text = "Open panel"),
+    tags$script(
+      glue(
+        "App.addClick('icon_settings', '{ns('show_panel')}')"
+      )
+    ),
     reactOutput(ns("react_panel"))
   )
 }
