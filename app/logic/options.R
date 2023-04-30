@@ -6,12 +6,12 @@
 #' @param rf \code{numeric} The risk-free interest rate, expressed as a decimal (e.g., 0.05 for 5%)
 #' @param time \code{numeric} Time to maturity, expressed in years (e.g., 1 for one year)
 #' @param N \code{integer} The number of time steps in the binomial model
-#' @param p \code{numeric} The probability of the underlying asset's price increasing at each time step
-#' @param u \code{numeric} The factor by which the underlying asset's price increases when it goes up
-#' @param d \code{numeric} The factor by which the underlying asset's price decreases when it goes down
+#' @param p \code{numeric} probability of the underlying asset's price increasing at each time step
+#' @param u \code{numeric} factor by which the underlying asset's price increases when it goes up
+#' @param d \code{numeric} factor by which the underlying asset's price decreases when it goes down
 #' @param s_0 \code{numeric} The initial price of the underlying asset
 #' @param k \code{numeric} The strike price of the option
-#' @param type \code{character} A character string indicating the option type: either "Call" or "Put"
+#' @param type \code{character} indicating the option type: either "Call" or "Put"
 #'
 #' @return \code{numeric} The price of the European call or put option
 #'
