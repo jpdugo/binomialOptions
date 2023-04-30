@@ -15,6 +15,8 @@
 #'
 #' @return \code{numeric} The price of the European call or put option
 #'
+#' @export
+#'
 #' @examples
 #' price_option(0.05, 1, 10, 0.6, 1.1, 0.9, 100, 110, "Call")
 #' price_option(0.05, 1, 10, 0.6, 1.1, 0.9, 100, 110, "Put")
