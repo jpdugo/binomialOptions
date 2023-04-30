@@ -1,20 +1,24 @@
 box::use(
-  shiny[bootstrapPage, moduleServer, NS, renderText, tags, textOutput],
+  shiny[moduleServer, NS],
+  shiny.fluent[...],
+  app/view/inputMenu,
 )
 
 #' @export
 ui <- function(id) {
   ns <- NS(id)
-  bootstrapPage(
-    tags$h3(
-      textOutput(ns("message"))
-    )
+  fluentPage(
+    inputMenu$ui(id = ns("values"))
   )
 }
 
 #' @export
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
-    output$message <- renderText("Hello!")
+    ns <- session$ns
+
+    inputMenu$server(
+      id = "values"
+    )
   })
 }
