@@ -1,5 +1,6 @@
 box::use(
   glue[glue],
+  graphics[...],
   purrr
 )
 
@@ -102,7 +103,6 @@ underlying_asset_value_matrix <- function(s_0, u, d, n) {
 #'
 #' @param data \code{data.frame} The matrix of the underlying asset value at each point in time
 #' @param n \code{integer} The number of time steps in the binomial model
-#' @param disable \code{logical} TRUE or FALSE
 #'
 #' @family Binomial Model Functions
 #'
@@ -111,8 +111,7 @@ underlying_asset_value_matrix <- function(s_0, u, d, n) {
 #' @examples
 #' underlying_matrix <- underlying_asset_value_matrix(100, 1.1, 0.9, 3)
 #' plot_tree(underlying_matrix, 3, "No")
-plot_tree <- function(data, n, disable) {
-  if (disable) {
+plot_tree <- function(data, n) {
     # Initialize the plot with the initial value of s_0
     # and use the maximum and minimum values of the last step as limits
     plot(
@@ -169,5 +168,4 @@ plot_tree <- function(data, n, disable) {
         )
       }
     }
-  }
 }
