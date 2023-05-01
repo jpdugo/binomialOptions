@@ -2,26 +2,15 @@ box::use(
   shiny[moduleServer, NS, eventReactive, renderPlot, plotOutput, validate, need],
   shiny.fluent[...],
   app / view / inputMenu,
-  app / logic / options
+  app / logic / options,
+  shinyjs
 )
 
 #' @export
 ui <- function(id) {
   ns <- NS(id)
   fluentPage(
-    CommandBar(
-      items = list(),
-      farItems = list(
-        list(
-          id        = "icon_settings",
-          key       = "settings",
-          text      = "Settings",
-          ariaLabel = "Settings",
-          iconOnly  = TRUE,
-          iconProps = list(iconName = "Settings")
-        )
-      )
-    ),
+    shinyjs$useShinyjs(),
     inputMenu$ui(id = ns("values")),
     plotOutput(ns("tree"))
   )
@@ -70,16 +59,11 @@ server <- function(id) {
           message = "WARNING - parameters must satisfy the following condition: d < e ^ r < u"
         )
       )
-      
+
       options$plot_tree(
         data = tree_data(),
         n    = params()$steps
       )
-      
-    })
-
-    shiny::observe({
-      print(tree_data())
     })
   })
 }

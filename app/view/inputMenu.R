@@ -1,30 +1,38 @@
 box::use(
   shiny[
     NS, tagList, moduleServer, eventReactive, is.reactive, selectInput,
-    observeEvent, req, renderText, textOutput, reactiveVal, tags, br
+    observeEvent, req, renderText, textOutput, reactiveVal, tags, br, observe
   ],
   shiny.fluent[...],
-  glue[glue]
+  glue[glue],
+  shinyjs
 )
 
 #' @export
 ui <- function(id) {
   ns <- NS(id)
   tagList(
-    tags$script(
-      glue(
-        "App.addClick('icon_settings', '{ns('show_panel')}')"
+    CommandBar(
+      items = list(),
+      farItems = list(
+        list(
+          id        = ns("icon_settings"),
+          key       = "settings",
+          text      = "Settings",
+          ariaLabel = "Settings",
+          iconOnly  = TRUE,
+          iconProps = list(iconName = "Settings")
+        )
       )
     ),
-    reactOutput(ns("react_panel")),
     Panel(
       headerText = "Configuration Panel",
       isOpen = TRUE,
-      onDismiss = JS(glue(
-        "function() {{
-           Shiny.setInputValue('{ns('hidePanel')}', Math.random());
-         }}"
-      )),
+      onDismiss = JS(
+        "function hideElement() {
+           $('.content-87').css('visibility', 'hidden'); // improve this later
+         }"
+      ),
       list(
         ChoiceGroup.shinyInput(
           inputId = ns("opt_class"),
@@ -123,6 +131,23 @@ server <- function(id) {
     id,
     function(input, output, session) {
       ns <- session$ns
+
+      observe(
+        {
+          shinyjs$runjs(
+            glue(
+              "App.addClick('{ns('icon_settings')}', '{ns('show_panel')}')"
+            )
+          )
+        },
+        autoDestroy = TRUE
+      )
+
+      observeEvent(input$show_panel, {
+        shinyjs$runjs(
+          "$('.content-87').css('visibility', 'visible');"
+        )
+      })
 
       eventReactive(input$run, {
         list(
