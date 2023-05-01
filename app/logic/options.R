@@ -20,6 +20,8 @@ box::use(
 #'
 #' @return \code{numeric} The price of the European call or put option
 #'
+#' @family Binomial Model Functions
+#'
 #' @export
 #'
 #' @examples
@@ -55,6 +57,8 @@ price_option <- function(rf, time, n, p, u, d, s_0, k, type) {
 #'
 #' @return \code{data.frame} The matrix of the underlying asset value at each point in time
 #'
+#' @family Binomial Model Functions
+#'
 #' @export
 #'
 #' @examples
@@ -88,4 +92,82 @@ underlying_asset_value_matrix <- function(s_0, u, d, n) {
   rownames(scenarios) <- nms[[2]]
 
   return(scenarios)
+}
+
+#' Plot the tree of the underlying asset price at each point in time
+#'
+#' This function creates a plot of the tree of the underlying asset price at each point in time,
+#' based on the provided matrix. It is used in the calculations of a
+#' Cox, Ross and Rubinstein binomial model.
+#'
+#' @param data \code{data.frame} The matrix of the underlying asset value at each point in time
+#' @param n \code{integer} The number of time steps in the binomial model
+#' @param disable \code{logical} TRUE or FALSE
+#'
+#' @family Binomial Model Functions
+#'
+#' @export
+#'
+#' @examples
+#' underlying_matrix <- underlying_asset_value_matrix(100, 1.1, 0.9, 3)
+#' plot_tree(underlying_matrix, 3, "No")
+plot_tree <- function(data, n, disable) {
+  if (disable) {
+    # Initialize the plot with the initial value of s_0
+    # and use the maximum and minimum values of the last step as limits
+    plot(
+      0,
+      data[1, 1],
+      xlim = c(0, n),
+      main = "Tree",
+      xlab = "Steps",
+      ylab = "Underlying Asset",
+      col = "black",
+      pch = 15,
+      ylim = c(min(data[, ncol(data)] * 0.98, na.rm = TRUE), max(data[, ncol(data)], na.rm = TRUE))
+    )
+
+    # Draw the tree lines
+    x_ <- 0
+    k <- 2
+    for (j in 1:(ncol(data) - 1)) {
+      for (i in 1:k) {
+        lines(
+          x = c(x_, (x_ + 1)),
+          y = c(data[i, j], data[i, j + 1]),
+          col = "orange"
+        )
+        lines(
+          x = c(x_, (x_ + 1)),
+          y = c(data[i, j], data[i + 1, j + 1]),
+          col = "orange"
+        )
+      }
+      x_ <- x_ + 1
+      k <- k + 1
+    }
+
+    # Plot the remaining points and a text indicating the underlying asset price in each scenario
+    step <- 0
+    for (j in 2:ncol(data)) {
+      step <- step + 1
+
+      for (i in 1:(step + 1)) {
+        points(
+          x   = step,
+          y   = data[i, j],
+          col = "black",
+          pch = 16
+        )
+
+        text(
+          x = step,
+          y = data[i, j],
+          adj = 0,
+          labels = as.character(round(data[i, j], digits = 2)),
+          pos = 1
+        )
+      }
+    }
+  }
 }
