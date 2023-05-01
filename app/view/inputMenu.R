@@ -30,7 +30,7 @@ ui <- function(id) {
       isOpen = TRUE,
       onDismiss = JS(
         "function hideElement() {
-           $('.content-87').css('visibility', 'hidden'); // improve this later
+           $('.ms-Panel').css('visibility', 'hidden'); // improve this later
          }"
       ),
       list(
@@ -105,16 +105,6 @@ ui <- function(id) {
           label   = "Deactivate Plot",
           value   = FALSE
         ),
-        TextField.shinyInput(
-          inputId = ns("plt_width"),
-          label   = "Plot Width (px)",
-          value   = "500"
-        ),
-        TextField.shinyInput(
-          inputId = ns("plt_height"),
-          label   = "Plot Height (px)",
-          value   = "500"
-        ),
         br(),
         PrimaryButton.shinyInput(
           inputId = ns("run"),
@@ -145,7 +135,7 @@ server <- function(id) {
 
       observeEvent(input$show_panel, {
         shinyjs$runjs(
-          "$('.content-87').css('visibility', 'visible');"
+          "$('.ms-Panel').css('visibility', 'visible');"
         )
       })
 

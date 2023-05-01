@@ -1,10 +1,23 @@
 box::use(
-  shiny[moduleServer, NS, eventReactive, renderPlot, plotOutput, validate, need],
+  shiny[moduleServer, NS, eventReactive, renderPlot, plotOutput, validate, need, div, tableOutput],
   shiny.fluent[...],
   app / view / inputMenu,
   app / logic / options,
-  shinyjs
+  shinyjs,
+  glue[glue]
 )
+
+makeCard <- function(title, content, size = 12, style = "") {
+  div(
+    class = glue("card ms-depth-8 ms-sm{size} ms-xl{size}"),
+    style = style,
+    Stack(
+      tokens = list(childrenGap = 5),
+      Text(variant = "large", title, block = TRUE),
+      content
+    )
+  )
+}
 
 #' @export
 ui <- function(id) {
@@ -12,7 +25,12 @@ ui <- function(id) {
   fluentPage(
     shinyjs$useShinyjs(),
     inputMenu$ui(id = ns("values")),
-    plotOutput(ns("tree"))
+    plotOutput(ns("tree")),
+    Stack(
+      tokens = list(childrenGap = 10), horizontal = TRUE,
+      makeCard("Call", div(style="max-height: 500px; overflow: auto")),
+      makeCard("Put", tableOutput(ns("call")))
+    )
   )
 }
 
@@ -52,6 +70,13 @@ server <- function(id) {
       )
     })
 
+    tree_plot <- eventReactive(tree_data(), {
+      options$plot_tree(
+        data = tree_data(),
+        n    = params()$steps
+      )
+    })
+
     output$tree <- renderPlot({
       validate(
         need(
@@ -59,11 +84,7 @@ server <- function(id) {
           message = "WARNING - parameters must satisfy the following condition: d < e ^ r < u"
         )
       )
-
-      options$plot_tree(
-        data = tree_data(),
-        n    = params()$steps
-      )
+      tree_plot()
     })
   })
 }
