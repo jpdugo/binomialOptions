@@ -139,18 +139,21 @@ server <- function(id) {
         )
       })
 
-      eventReactive(input$run, {
-        list(
-          class      = input$opt_class,
-          type       = input$opt_type,
-          underlying = input$opt_underlying,
-          strike     = input$opt_strike,
-          sigma      = input$opt_sigma,
-          risk_free  = input$opt_risk_free,
-          t          = input$opt_time,
-          steps      = input$opt_steps
-        )
-      })
+      eventReactive(input$run,
+        {
+          list(
+            class      = input$opt_class,
+            type       = input$opt_type,
+            underlying = input$opt_underlying,
+            strike     = input$opt_strike,
+            sigma      = input$opt_sigma,
+            risk_free  = input$opt_risk_free,
+            t          = input$opt_time,
+            steps      = input$opt_steps
+          )
+        },
+        ignoreNULL = FALSE
+      )
     }
   )
 }

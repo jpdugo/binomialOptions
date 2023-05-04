@@ -25,10 +25,16 @@ ui <- function(id) {
   fluentPage(
     shinyjs$useShinyjs(),
     inputMenu$ui(id = ns("values")),
-    plotOutput(ns("tree")),
     Stack(
-      tokens = list(childrenGap = 10), horizontal = TRUE,
-      makeCard("Call", div(style="max-height: 500px; overflow: auto")),
+      makeCard(
+        title = "Tree",
+        content = plotOutput(ns("tree"))
+      )
+    ),
+    Stack(
+      tokens = list(childrenGap = 10),
+      horizontal = TRUE,
+      makeCard("Call", div(style = "max-height: 500px; overflow: auto")),
       makeCard("Put", tableOutput(ns("call")))
     )
   )

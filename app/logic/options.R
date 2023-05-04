@@ -4,46 +4,7 @@ box::use(
   purrr
 )
 
-#' Calculate the price of a European call or put option
-#'
-#' This function calculates the price of a European call or put option using the binomial model.
-#' European options can only be exercised at the end of the option's life.
-#'
-#' @param rf \code{numeric} The risk-free interest rate, expressed as a decimal (e.g., 0.05 for 5%)
-#' @param time \code{numeric} Time to maturity, expressed in years (e.g., 1 for one year)
-#' @param n \code{integer} The number of time steps in the binomial model
-#' @param p \code{numeric} probability of the underlying asset's price increasing at each time step
-#' @param u \code{numeric} factor by which the underlying asset's price increases when it goes up
-#' @param d \code{numeric} factor by which the underlying asset's price decreases when it goes down
-#' @param s_0 \code{numeric} The initial price of the underlying asset
-#' @param k \code{numeric} The strike price of the option
-#' @param type \code{character} indicating the option type: either "Call" or "Put"
-#'
-#' @return \code{numeric} The price of the European call or put option
-#'
-#' @family Binomial Model Functions
-#'
-#' @export
-#'
-#' @examples
-#' price_option(0.05, 1, 10, 0.6, 1.1, 0.9, 100, 110, "Call")
-#' price_option(0.05, 1, 10, 0.6, 1.1, 0.9, 100, 110, "Put")
-price_option <- function(rf, time, n, p, u, d, s_0, k, type) {
-  res <- vector("numeric", n + 1)
-
-  for (i in 0:n) {
-    res[i + 1] <-
-      (factorial(n) / (factorial(i) * factorial(n - i))) *
-        p^i * (1 - p)^(n - i) *
-        switch(
-          EXPR = type,
-          Call = max(c((u^i * d^(n - i) * s_0 - k), 0)),
-          Put  = max(c((k - u^i * d^(n - i) * s_0), 0))
-        )
-  }
-  # calculate present value
-  sum(res) * exp(-(rf * time))
-}
+# 1 Tree --------------------------------------------------------------------------------------
 
 #' Calculate the matrix of the underlying asset value at each point in time
 #'
@@ -169,3 +130,103 @@ plot_tree <- function(data, n) {
     }
   }
 }
+
+# 2 European ----------------------------------------------------------------------------------
+
+#' Calculate the price of a European call or put option
+#'
+#' This function calculates the price of a European call or put option using the binomial model.
+#' European options can only be exercised at the end of the option's life.
+#'
+#' @param rf \code{numeric} The risk-free interest rate, expressed as a decimal (e.g., 0.05 for 5%)
+#' @param time \code{numeric} Time to maturity, expressed in years (e.g., 1 for one year)
+#' @param n \code{integer} The number of time steps in the binomial model
+#' @param p \code{numeric} probability of the underlying asset's price increasing at each time step
+#' @param u \code{numeric} factor by which the underlying asset's price increases when it goes up
+#' @param d \code{numeric} factor by which the underlying asset's price decreases when it goes down
+#' @param s_0 \code{numeric} The initial price of the underlying asset
+#' @param k \code{numeric} The strike price of the option
+#' @param type \code{character} indicating the option type: either "Call" or "Put"
+#'
+#' @return \code{numeric} The price of the European call or put option
+#'
+#' @family Binomial Model Functions
+#'
+#' @export
+#'
+#' @examples
+#' price_option(0.05, 1, 10, 0.6, 1.1, 0.9, 100, 110, "Call")
+#' price_option(0.05, 1, 10, 0.6, 1.1, 0.9, 100, 110, "Put")
+price_option <- function(rf, time, n, p, u, d, s_0, k, type) {
+  res <- vector("numeric", n + 1)
+  
+  for (i in 0:n) {
+    res[i + 1] <-
+      (factorial(n) / (factorial(i) * factorial(n - i))) *
+      p^i * (1 - p)^(n - i) *
+      switch(
+        EXPR = type,
+        Call = max(c((u^i * d^(n - i) * s_0 - k), 0)),
+        Put  = max(c((k - u^i * d^(n - i) * s_0), 0))
+      )
+  }
+  # calculate present value
+  sum(res) * exp(-(rf * time))
+}
+
+#' Calculate intermediate nodes of the option price matrix
+#'
+#' This function computes the intermediate nodes of the option price matrix based on the
+#' output of the underlying_asset_value_matrix function. It uses the generic price_option
+#' function to value options at each node.
+#'
+#' @param data \code{matrix} The output of the underlying_asset_value_matrix function
+#' @param rf \code{numeric} The risk-free interest rate
+#' @param time \code{numeric} The time to maturity of the option
+#' @param steps \code{integer} The number of time steps in the binomial model
+#' @param d \code{numeric} factor by which the underlying asset's price decreases when it goes down
+#' @param u \code{numeric} factor by which the underlying asset's price increases when it goes up
+#' @param p \code{numeric} The risk-neutral probability of an upward movement in the underlying asset price
+#' @param k \code{numeric} The strike price of the option
+#' @param poc \code{character} The type of option, either "Call" or "Put"
+#'
+#' @return \code{data.frame} The matrix of intermediate nodes of the option price
+#'
+#' @family Binomial Model Functions
+#'
+#' @export
+#'
+#' @examples
+#' # First, create the underlying asset value matrix
+#' asset_value_matrix <- underlying_asset_value_matrix(100, 1.1, 0.9, 3)
+#' # Then, calculate the intermediate nodes of the option price matrix
+#' intermediate_nodes(asset_value_matrix, 0.05, 1, 3, 0.9, 1.1, 0.5, 100, "Call")
+intermediate_nodes <- function(data, rf, time, steps, d, u, p, k, type) {
+  alpha <- time / steps # to discount at intermediate steps
+  
+  limit <- 1 # in each column of the `data` argument, a scenario is added
+  for (j in 1:length(data[1, ])) {
+    for (i in 1:limit) {
+      # as each element different from NA in data is a node => we can use the generic function to value options in each one
+      data[i, j] <- price_option(
+        rf       = rf,
+        s_0      = data[i, j],
+        time     = time,
+        d        = d,
+        u        = u,
+        p        = p,
+        n        = steps,
+        k        = k,
+        type     = type
+      )
+    }
+    limit <- limit + 1 # I start from the zero moment where there is a single node
+    time <- time - alpha # as there are fewer steps left, r is multiplied by a fraction of T
+    steps <- steps - 1 # as we change columns, the remaining steps decrease
+  }
+  
+  return(as.data.frame(data))
+}
+
+# 3 American ----------------------------------------------------------------------------------
+
