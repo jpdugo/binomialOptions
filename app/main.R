@@ -1,5 +1,8 @@
 box::use(
-  shiny[moduleServer, NS, eventReactive, renderPlot, plotOutput, validate, need, div, tableOutput],
+  shiny[
+    moduleServer, NS, eventReactive, renderPlot, plotOutput, validate, need, div, uiOutput,
+    renderUI
+  ],
   shiny.fluent[...],
   app / view / inputMenu,
   app / logic / options,
@@ -34,8 +37,8 @@ ui <- function(id) {
     Stack(
       tokens = list(childrenGap = 10),
       horizontal = TRUE,
-      makeCard("Call", div(style = "max-height: 500px; overflow: auto")),
-      makeCard("Put", tableOutput(ns("call")))
+      makeCard("Call", uiOutput(ns("call"))),
+      makeCard("Put", uiOutput(ns("put")))
     )
   )
 }
@@ -92,5 +95,46 @@ server <- function(id) {
       )
       tree_plot()
     })
+
+    price_call <- eventReactive(tree_data(), {
+      with(params(), {
+        options$intermediate_nodes(
+          data  = tree_data(),
+          rf    = risk_free,
+          time  = t,
+          steps = steps,
+          d     = d(),
+          u     = u(),
+          p     = p(),
+          k     = strike,
+          type  = "Call"
+        )
+      })
+    })
+
+    price_put <- eventReactive(tree_data(), {
+      with(params(), {
+        options$intermediate_nodes(
+          data  = tree_data(),
+          rf    = risk_free,
+          time  = t,
+          steps = steps,
+          d     = d(),
+          u     = u(),
+          p     = p(),
+          k     = strike,
+          type  = "Put"
+        )
+      })
+    })
+    
+    output$call <- renderUI({
+      DetailsList(items = price_call())
+    })
+    
+    output$put <- renderUI({
+      DetailsList(items = price_put())
+    })
+    
   })
 }

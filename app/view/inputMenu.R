@@ -43,15 +43,6 @@ ui <- function(id) {
             list(key = 2, text = "European")
           )
         ),
-        ChoiceGroup.shinyInput(
-          inputId = ns("opt_type"),
-          label = "Option Type",
-          value = 1,
-          options = list(
-            list(key = 1, text = "Call"),
-            list(key = 2, text = "Put")
-          )
-        ),
         Slider.shinyInput(
           inputId = ns("opt_underlying"),
           label   = "Underlying Asset Value",
@@ -143,7 +134,6 @@ server <- function(id) {
         {
           list(
             class      = input$opt_class,
-            type       = input$opt_type,
             underlying = input$opt_underlying,
             strike     = input$opt_strike,
             sigma      = input$opt_sigma,
