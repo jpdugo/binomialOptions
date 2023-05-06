@@ -96,6 +96,16 @@ ui <- function(id) {
           label   = "Deactivate Plot",
           value   = FALSE
         ),
+        TextField.shinyInput(
+          inputId = ns("plt_width"),
+          label   = "Plot Width (px)",
+          value   = "auto"
+        ),
+        TextField.shinyInput(
+          inputId = ns("plt_height"),
+          label   = "Plot Height (px)",
+          value   = "500"
+        ),
         br(),
         PrimaryButton.shinyInput(
           inputId = ns("run"),
