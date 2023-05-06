@@ -96,15 +96,13 @@ ui <- function(id) {
           label   = "Deactivate Plot",
           value   = FALSE
         ),
-        TextField.shinyInput(
-          inputId = ns("plt_width"),
-          label   = "Plot Width (px)",
-          value   = "auto"
-        ),
-        TextField.shinyInput(
+        Slider.shinyInput(
           inputId = ns("plt_height"),
           label   = "Plot Height (px)",
-          value   = "500"
+          min     = 200,
+          max     = 1000,
+          step    = 20,
+          value   = 500
         ),
         br(),
         PrimaryButton.shinyInput(
@@ -117,7 +115,7 @@ ui <- function(id) {
 }
 
 #' @export
-server <- function(id) {
+server <- function(id, reactive_values) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -138,6 +136,10 @@ server <- function(id) {
         shinyjs$runjs(
           "$('.ms-Panel').css('visibility', 'visible');"
         )
+      })
+      
+      observeEvent(input$plt_height, {
+        reactive_values$height <- input$plt_height
       })
 
       eventReactive(input$run,

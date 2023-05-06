@@ -1,7 +1,7 @@
 box::use(
   shiny[
     moduleServer, NS, eventReactive, renderPlot, plotOutput, validate, need, div, uiOutput,
-    renderUI, br
+    renderUI, br, reactiveValues
   ],
   dplyr[...],
   shiny.fluent[...],
@@ -42,7 +42,7 @@ ui <- function(id) {
     Stack(
       make_card(
         title = "Tree",
-        content = plotOutput(ns("tree"), height = 500)
+        content = uiOutput(ns("tree_container"))
       )
     ),
     br(),
@@ -58,9 +58,12 @@ ui <- function(id) {
 #' @export
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    plt_size <- reactiveValues(height = NULL)
+
     ns <- session$ns
     params <- inputMenu$server(
-      id = "values"
+      id = "values",
+      reactive_values = plt_size
     )
 
     u <- eventReactive(params(), {
@@ -97,6 +100,14 @@ server <- function(id) {
         n    = params()$steps
       )
     })
+
+    output$tree_container <- renderUI({
+      plotOutput(
+        outputId = ns("tree"),
+        height   = as.numeric(plt_size$height)
+      )
+    })
+    plotOutput(ns("tree"), height = 500)
 
     output$tree <- renderPlot({
       validate(
