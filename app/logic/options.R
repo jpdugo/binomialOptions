@@ -159,16 +159,16 @@ plot_tree <- function(data, n) {
 #' price_option(0.05, 1, 10, 0.6, 1.1, 0.9, 100, 110, "Put")
 price_option <- function(rf, time, n, p, u, d, s_0, k, type) {
   res <- vector("numeric", n + 1)
-  
+
   for (i in 0:n) {
     res[i + 1] <-
       (factorial(n) / (factorial(i) * factorial(n - i))) *
-      p^i * (1 - p)^(n - i) *
-      switch(
-        EXPR = type,
-        Call = max(c((u^i * d^(n - i) * s_0 - k), 0)),
-        Put  = max(c((k - u^i * d^(n - i) * s_0), 0))
-      )
+        p^i * (1 - p)^(n - i) *
+        switch(
+          EXPR = type,
+          Call = max(c((u^i * d^(n - i) * s_0 - k), 0)),
+          Put  = max(c((k - u^i * d^(n - i) * s_0), 0))
+        )
   }
   # calculate present value
   sum(res) * exp(-(rf * time))
@@ -186,7 +186,8 @@ price_option <- function(rf, time, n, p, u, d, s_0, k, type) {
 #' @param steps \code{integer} The number of time steps in the binomial model
 #' @param d \code{numeric} factor by which the underlying asset's price decreases when it goes down
 #' @param u \code{numeric} factor by which the underlying asset's price increases when it goes up
-#' @param p \code{numeric} The risk-neutral probability of an upward movement in the underlying asset price
+#' @param p \code{numeric} The risk-neutral probability of an upward movement in the underlying
+#' asset price
 #' @param k \code{numeric} The strike price of the option
 #' @param poc \code{character} The type of option, either "Call" or "Put"
 #'
@@ -203,11 +204,12 @@ price_option <- function(rf, time, n, p, u, d, s_0, k, type) {
 #' intermediate_nodes(asset_value_matrix, 0.05, 1, 3, 0.9, 1.1, 0.5, 100, "Call")
 intermediate_nodes <- function(data, rf, time, steps, d, u, p, k, type) {
   alpha <- time / steps # to discount at intermediate steps
-  
+
   limit <- 1 # in each column of the `data` argument, a scenario is added
-  for (j in 1:length(data[1, ])) {
+  for (j in seq_along(data[1, ])) {
     for (i in 1:limit) {
-      # as each element different from NA in data is a node => we can use the generic function to value options in each one
+      # as each element different from NA in data is a node => we can use the generic function
+      # to value options in each of them
       data[i, j] <- price_option(
         rf       = rf,
         s_0      = data[i, j],
@@ -224,9 +226,8 @@ intermediate_nodes <- function(data, rf, time, steps, d, u, p, k, type) {
     time <- time - alpha # as there are fewer steps left, r is multiplied by a fraction of T
     steps <- steps - 1 # as we change columns, the remaining steps decrease
   }
-  
+
   return(as.data.frame(data))
 }
 
 # 3 American ----------------------------------------------------------------------------------
-

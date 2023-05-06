@@ -15,13 +15,13 @@ box::use(
   stringr
 )
 
-makeCard <- function(title, content, size = 12, style = "") {
+make_card <- function(title, content, size = 12, style = "") {
   div(
     class = glue("card ms-depth-8 ms-sm{size} ms-xl{size}"),
     style = style,
     Stack(
       tokens = list(childrenGap = 5),
-      Text(variant = "large", title, block = TRUE),
+      Text(variant = "large", title, block = FALSE),
       content
     )
   )
@@ -34,7 +34,7 @@ ui <- function(id) {
     shinyjs$useShinyjs(),
     inputMenu$ui(id = ns("values")),
     Stack(
-      makeCard(
+      make_card(
         title = "Tree",
         content = plotOutput(ns("tree"))
       )
@@ -43,8 +43,8 @@ ui <- function(id) {
     Stack(
       tokens = list(childrenGap = 10),
       horizontal = TRUE,
-      makeCard("Call", uiOutput(ns("call"))),
-      makeCard("Put", uiOutput(ns("put")))
+      make_card("Call", uiOutput(ns("call"))),
+      make_card("Put", uiOutput(ns("put")))
     )
   )
 }
@@ -138,9 +138,9 @@ server <- function(id) {
       data <- price_call() |> tibble$rownames_to_column()
       columns <- rlang$list2(
         list(
-          key         = "successes",
+          key         = "rowname",
           name        = "n_succeses",
-          fieldName   = "id",
+          fieldName   = "rowname",
           minWidth    = 50,
           maxWidth    = 100,
           isResizable = TRUE
@@ -150,17 +150,47 @@ server <- function(id) {
             key         = y,
             name        = stringr::str_to_title(y),
             fieldName   = y,
-            minWidth    = 100,
-            maxWidth    = 200,
+            minWidth    = 50,
+            maxWidth    = 100,
             isResizable = TRUE
           )
         })
       )
-      DetailsList(items = data, columns = purrr$set_names(columns, NULL))
+      DetailsList(
+        items              = data,
+        columns            = purrr$set_names(columns, NULL),
+        checkboxVisibility = 2
+      )
     })
 
     output$put <- renderUI({
-      DetailsList(items = price_put())
+      data <- price_put() |> tibble$rownames_to_column()
+      columns <- rlang$list2(
+        list(
+          key         = "rowname",
+          name        = "n_succeses",
+          fieldName   = "rowname",
+          minWidth    = 50,
+          maxWidth    = 100,
+          isResizable = TRUE
+        ),
+        !!!purrr$imap(select(data, -rowname), \(x, y) {
+          list(
+            key         = y,
+            name        = stringr::str_to_title(y),
+            fieldName   = y,
+            minWidth    = 50,
+            maxWidth    = 100,
+            isResizable = TRUE
+          )
+        })
+      )
+
+      DetailsList(
+        items              = data,
+        columns            = purrr$set_names(columns, NULL),
+        checkboxVisibility = 2
+      )
     })
   })
 }
