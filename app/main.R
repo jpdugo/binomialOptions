@@ -1,13 +1,18 @@
 box::use(
   shiny[
     moduleServer, NS, eventReactive, renderPlot, plotOutput, validate, need, div, uiOutput,
-    renderUI
+    renderUI, br
   ],
+  dplyr[...],
   shiny.fluent[...],
   app / view / inputMenu,
   app / logic / options,
   shinyjs,
-  glue[glue]
+  tibble,
+  glue[glue],
+  rlang,
+  purrr,
+  stringr
 )
 
 makeCard <- function(title, content, size = 12, style = "") {
@@ -34,6 +39,7 @@ ui <- function(id) {
         content = plotOutput(ns("tree"))
       )
     ),
+    br(),
     Stack(
       tokens = list(childrenGap = 10),
       horizontal = TRUE,
@@ -127,14 +133,34 @@ server <- function(id) {
         )
       })
     })
-    
+
     output$call <- renderUI({
-      DetailsList(items = price_call())
+      data <- price_call() |> tibble$rownames_to_column()
+      columns <- rlang$list2(
+        list(
+          key         = "successes",
+          name        = "n_succeses",
+          fieldName   = "id",
+          minWidth    = 50,
+          maxWidth    = 100,
+          isResizable = TRUE
+        ),
+        !!!purrr$imap(select(data, -rowname), \(x, y) {
+          list(
+            key         = y,
+            name        = stringr::str_to_title(y),
+            fieldName   = y,
+            minWidth    = 100,
+            maxWidth    = 200,
+            isResizable = TRUE
+          )
+        })
+      )
+      DetailsList(items = data, columns = purrr$set_names(columns, NULL))
     })
-    
+
     output$put <- renderUI({
       DetailsList(items = price_put())
     })
-    
   })
 }
