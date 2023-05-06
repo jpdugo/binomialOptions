@@ -13,7 +13,25 @@ ui <- function(id) {
   ns <- NS(id)
   tagList(
     CommandBar(
-      items = list(),
+      items = list(
+        list(
+          text = Toggle.shinyInput(
+            inputId = ns("plt_activate"),
+            label   = "Activate Plot",
+            value   = TRUE
+          )
+        ),
+        list(
+          text = Slider.shinyInput(
+            inputId = ns("plt_height"),
+            label   = "Plot Height (px)",
+            min     = 200,
+            max     = 1000,
+            step    = 20,
+            value   = 500
+          )
+        )
+      ),
       farItems = list(
         list(
           id        = ns("icon_settings"),
@@ -91,19 +109,6 @@ ui <- function(id) {
           step    = 1,
           value   = 5
         ),
-        Toggle.shinyInput(
-          inputId = ns("plt_deactivate"),
-          label   = "Deactivate Plot",
-          value   = FALSE
-        ),
-        Slider.shinyInput(
-          inputId = ns("plt_height"),
-          label   = "Plot Height (px)",
-          min     = 200,
-          max     = 1000,
-          step    = 20,
-          value   = 500
-        ),
         br(),
         PrimaryButton.shinyInput(
           inputId = ns("run"),
@@ -140,6 +145,10 @@ server <- function(id, reactive_values) {
 
       observeEvent(input$plt_height, {
         reactive_values$height <- input$plt_height
+      })
+
+      observeEvent(input$plt_activate, {
+        reactive_values$activate <- input$plt_activate
       })
 
       eventReactive(input$run,
