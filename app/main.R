@@ -27,6 +27,12 @@ make_card <- function(title, content, size = 12, style = "") {
   )
 }
 
+card_6 <- purrr$partial(
+  .f = make_card,
+  size = 6,
+  style = "overflow-y: auto;height: 500px;"
+)
+
 #' @export
 ui <- function(id) {
   ns <- NS(id)
@@ -36,15 +42,15 @@ ui <- function(id) {
     Stack(
       make_card(
         title = "Tree",
-        content = plotOutput(ns("tree"))
+        content = plotOutput(ns("tree"), height = 500)
       )
     ),
     br(),
     Stack(
       tokens = list(childrenGap = 10),
       horizontal = TRUE,
-      make_card("Call", uiOutput(ns("call"))),
-      make_card("Put", uiOutput(ns("put")))
+      card_6(title = "Call", content = uiOutput(ns("call"))),
+      card_6(title = "Put", content = uiOutput(ns("put")))
     )
   )
 }
@@ -171,7 +177,7 @@ server <- function(id) {
           name        = "n_succeses",
           fieldName   = "rowname",
           minWidth    = 50,
-          maxWidth    = 100,
+          maxWidth    = NULL,
           isResizable = TRUE
         ),
         !!!purrr$imap(select(data, -rowname), \(x, y) {
