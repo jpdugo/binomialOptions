@@ -67,6 +67,8 @@ server <- function(id) {
       reactive_values = plt_size
     )
 
+    # 1 Data --------------------------------------------------------------------------------------
+
     u <- eventReactive(params(), {
       with(params(), {
         (exp(sigma * sqrt(t / steps)))
@@ -95,6 +97,8 @@ server <- function(id) {
       )
     })
 
+    # 2 Tree Plot -------------------------------------------------------------------------------------
+
     tree_plot <- eventReactive(tree_data(), {
       options$plot_tree(
         data = tree_data(),
@@ -119,6 +123,10 @@ server <- function(id) {
       )
       tree_plot()
     })
+
+    # 3 Options -----------------------------------------------------------------------------------
+
+    # > 1 European  ---------------------------------------------------------------------------
 
     price_call <- eventReactive(tree_data(), {
       with(params(), {
