@@ -42,7 +42,8 @@ ui <- function(id) {
     Stack(
       make_card(
         title = "Tree",
-        content = uiOutput(ns("tree_container"))
+        content = uiOutput(ns("tree_container")),
+        style = "overflow-y: auto;height: 500px;"
       )
     ),
     br(),

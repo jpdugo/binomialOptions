@@ -87,9 +87,9 @@ ui <- function(id) {
           inputId = ns("opt_steps"),
           label   = "Number of Steps",
           min     = 1,
-          max     = 100,
+          max     = 25,
           step    = 1,
-          value   = 3
+          value   = 5
         ),
         Toggle.shinyInput(
           inputId = ns("plt_deactivate"),
@@ -137,7 +137,7 @@ server <- function(id, reactive_values) {
           "$('.ms-Panel').css('visibility', 'visible');"
         )
       })
-      
+
       observeEvent(input$plt_height, {
         reactive_values$height <- input$plt_height
       })
