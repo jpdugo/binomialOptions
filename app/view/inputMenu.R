@@ -55,7 +55,7 @@ ui <- function(id) {
         ChoiceGroup.shinyInput(
           inputId = ns("opt_class"),
           label = "Option Class",
-          value = 1,
+          value = 2,
           options = list(
             list(key = 1, text = "American"),
             list(key = 2, text = "European")
@@ -133,6 +133,7 @@ server <- function(id, reactive_values) {
               "App.addClick('{ns('icon_settings')}', '{ns('show_panel')}')"
             )
           )
+          shinyjs::runjs("$('i[data-icon-name=\"Cancel\"]').click();")
         },
         autoDestroy = TRUE
       )
