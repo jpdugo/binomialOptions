@@ -44,12 +44,19 @@ ui <- function(id) {
       )
     ),
     Panel(
+      id = ns("main_panel"),
       headerText = "Configuration Panel",
       isOpen = TRUE,
       onDismiss = JS(
-        "function hideElement() {
-           $('.ms-Panel').css('visibility', 'hidden'); // improve this later
-         }"
+        glue(
+          "function closePanel() {
+             const panelElement = document.getElementById('≤input_id≥');
+             panelElement.classList.add('shinyjs-hide');
+           }",
+        input_id = ns("main_panel"),
+        .open    = "≤",
+        .close   = "≥"
+        )
       ),
       list(
         ChoiceGroup.shinyInput(
@@ -130,18 +137,20 @@ server <- function(id, reactive_values) {
         {
           shinyjs$runjs(
             glue(
-              "App.addClick('{ns('icon_settings')}', '{ns('show_panel')}')"
+              "App.addClick('{ns('icon_settings')}', '{element_id}');
+               // avoid overflow: hidden !important; from calling Panel function
+               const bodyElement = document.getElementsByClassName('ms-Fabric');
+               bodyElement[0].className = 'ms-Fabric ms-Fabric--isFocusHidden';",
+              element_id = ns("show_panel")
             )
           )
-          shinyjs::runjs("$('i[data-icon-name=\"Cancel\"]').click();")
+          shinyjs$hide("main_panel")
         },
         autoDestroy = TRUE
       )
 
       observeEvent(input$show_panel, {
-        shinyjs$runjs(
-          "$('.ms-Panel').css('visibility', 'visible');"
-        )
+        shinyjs$show("main_panel")
       })
 
       observeEvent(input$plt_height, {

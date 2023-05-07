@@ -21,8 +21,7 @@ ui <- function(id) {
     Stack(
       make_card(
         title   = "Tree",
-        content = uiOutput(ns("tree_container")),
-        style   = "overflow-y: auto;height: auto;"
+        content = uiOutput(ns("tree_container"))
       )
     ),
     br(),
@@ -96,7 +95,7 @@ server <- function(id) {
 
     output$tree <- renderPlot({
       validate(
-        need(
+        need( # change later the color to red of this validate message
           expr    = p() <= 1,
           message = "WARNING - parameters must satisfy the following condition: d < e ^ r < u"
         )
