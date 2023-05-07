@@ -59,7 +59,7 @@ make_card <- function(title, content, size = 12, style = "") {
 card_6 <- purrr$partial(
   .f = make_card,
   size = 6,
-  style = "overflow-y: auto;height: 500px;"
+  style = "overflow-y: auto;height: 700px;"
 )
 
 #' Create a formatted list of details for a given dataset
@@ -90,8 +90,6 @@ details_list <- function(data) {
       key         = "rowname",
       name        = "n_succeses",
       fieldName   = "rowname",
-      minWidth    = 50,
-      maxWidth    = NULL,
       isResizable = TRUE
     ),
     !!!purrr$imap(select(data, -rowname), \(x, y) {

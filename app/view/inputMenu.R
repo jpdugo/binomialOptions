@@ -53,9 +53,9 @@ ui <- function(id) {
              const panelElement = document.getElementById('≤input_id≥');
              panelElement.classList.add('shinyjs-hide');
            }",
-        input_id = ns("main_panel"),
-        .open    = "≤",
-        .close   = "≥"
+          input_id = ns("main_panel"),
+          .open = "≤",
+          .close = "≥"
         )
       ),
       list(
