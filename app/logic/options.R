@@ -241,7 +241,7 @@ intermediate_nodes <- function(data, rf, time, steps, d, u, p, k, type) {
 #' @param data \code{matrix} Output of the price_option function, representing the option prices at
 #' different time steps
 #' @param k \code{numeric} The strike price of the option
-#' @param call_or_put \code{character} indicating the option type: either "Call" or "Put"
+#' @param type \code{character} indicating the option type: either "Call" or "Put"
 #'
 #' @return \code{matrix} The matrix of American call or put option payoffs at different time steps
 #'
