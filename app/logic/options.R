@@ -252,7 +252,7 @@ intermediate_nodes <- function(data, rf, time, steps, d, u, p, k, type) {
 #' @examples
 #' # First, create the underlying asset value matrix
 #' asset_value_matrix <- underlying_asset_value_matrix(100, 1.1, 0.9, 3)
-#' # Then
+#' # Then calculate the payoffs
 #' exercise_option(asset_value_matrix, 110, "Call")
 exercise_option <- function(data, k, type) {
   data <- switch(type,
