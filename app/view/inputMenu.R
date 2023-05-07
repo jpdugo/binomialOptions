@@ -122,7 +122,8 @@ ui <- function(id) {
           text    = "Calculate"
         )
       )
-    )
+    ),
+    reactOutput(ns("teaching_bubble"))
   )
 }
 
@@ -133,21 +134,33 @@ server <- function(id, reactive_values) {
     function(input, output, session) {
       ns <- session$ns
 
-      observe(
-        {
-          shinyjs$runjs(
-            glue(
-              "App.addClick('{ns('icon_settings')}', '{element_id}');
-               // avoid overflow: hidden !important; from calling Panel function
-               const bodyElement = document.getElementsByClassName('ms-Fabric');
-               bodyElement[0].className = 'ms-Fabric ms-Fabric--isFocusHidden';",
-              element_id = ns("show_panel")
-            )
+      bubble_activate <- reactiveVal(TRUE)
+
+      observe({
+        shinyjs$runjs(
+          glue(
+            "App.addClick('{ns('icon_settings')}', '{element_id}');
+             // avoid overflow: hidden !important; from calling Panel function
+             const bodyElement = document.getElementsByClassName('ms-Fabric');
+             bodyElement[0].className = 'ms-Fabric ms-Fabric--isFocusHidden';",
+            element_id = ns("show_panel")
           )
-          shinyjs$hide("main_panel")
-        },
-        autoDestroy = TRUE
-      )
+        )
+        shinyjs$hide("main_panel")
+      })
+
+      output$teaching_bubble <- renderReact({
+        if (bubble_activate()) {
+          TeachingBubble(
+            target   = glue("#{ns('icon_settings')}"),
+            headline = "Press To Customize Parameters!"
+          )
+        }
+      })
+
+      observeEvent(input$show_panel, {
+        bubble_activate(FALSE)
+      })
 
       observeEvent(input$show_panel, {
         shinyjs$show("main_panel")
