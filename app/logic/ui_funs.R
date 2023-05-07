@@ -59,7 +59,7 @@ make_card <- function(title, content, size = 12, style = "") {
 card_6 <- purrr$partial(
   .f = make_card,
   size = 6,
-  style = "overflow-y: auto;height: 700px;"
+  style = "overflow-y: auto;height: 550px;"
 )
 
 #' Create a formatted list of details for a given dataset
