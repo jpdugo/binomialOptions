@@ -231,3 +231,80 @@ intermediate_nodes <- function(data, rf, time, steps, d, u, p, k, type) {
 }
 
 # 3 American ----------------------------------------------------------------------------------
+
+#' Calculate the payoff of an American option
+#'
+#' This function calculates the payoff of an American call or put option using the binomial model.
+#' American options can be exercised at any time before the option's expiration.
+#'
+#' @param data \code{matrix} Output of the price_option function, representing the option prices at different time steps
+#' @param k \code{numeric} The strike price of the option
+#' @param call_or_put \code{character} indicating the option type: either "Call" or "Put"
+#'
+#' @return \code{matrix} The matrix of American call or put option payoffs at different time steps
+#'
+#' @family Binomial Model Functions
+#'
+#' @export
+#'
+#' @examples
+#' # First, create the underlying asset value matrix
+#' asset_value_matrix <- underlying_asset_value_matrix(100, 1.1, 0.9, 3)
+#' # Then
+#' exercise_option(asset_value_matrix, 110, "Call")
+exercise_option <- function(data, k, type) {
+  data <- switch(type,
+    "Call" = data - k,
+    "Put"  = k - data
+  )
+
+  as.data.frame(data) |>
+    mutate(
+      across(
+        .cols = everything(),
+        .fns = \(.x) case_when(
+          .x > 0 ~ .x,
+          .default = 0
+        )
+      )
+    )
+}
+
+#' Calculate the price of an American option
+#'
+#' This function calculates the price of an American call or put option using the binomial model.
+#' American options can be exercised at any time before the option's expiration.
+#'
+#' @param data \code{data.frame} The output of the exercise_option function, representing option payoffs at different time steps
+#' @param p \code{numeric} probability of the underlying asset's price increasing at each time step
+#' @param r \code{numeric} The risk-free interest rate, expressed as a decimal (e.g., 0.05 for 5%)
+#' @param n \code{integer} The number of time steps in the binomial model
+#' @param time \code{numeric} Time to maturity, expressed in years (e.g., 1 for one year)
+#'
+#' @return \code{data.frame} The matrix of American option prices at different time steps
+#'
+#' @family Binomial Model Functions
+#'
+#' @export
+#'
+#' @examples
+#' payoff_data <- underlying_asset_value_matrix(100, 1.1, 0.9, 3) |>
+#'   exercise_option(price_data, 110, "Call")
+#' price_american_option(payoff_data, 0.6, 0.05, 10, 1)
+price_american_option <- function(data, p, r, n, time) {
+  alpha <- time / n
+  # Start from the end
+  limit <- n
+  for (column in (ncol(data) - 1):1) {
+    for (row in 1:limit) { # repeat the operation for each node within the step
+      data[row, column] <- max(
+        data[row, column], # maximum between exercising and continuing to wait
+        exp(-r * alpha) * ((1 - p) * data[row, (column + 1)] + p * data[(row + 1), (column + 1)])
+      )
+    }
+
+    limit <- limit - 1
+  }
+
+  return(data)
+}

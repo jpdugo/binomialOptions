@@ -38,31 +38,31 @@ ui <- function(id) {
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
     plt_size <- reactiveValues(height = NULL, activate = NULL)
-
+    
     ns <- session$ns
     params <- inputMenu$server(
       id = "values",
       reactive_values = plt_size
     )
-
+    
     # 1 Data --------------------------------------------------------------------------------------
-
+    
     u <- eventReactive(params(), {
       with(params(), {
         (exp(sigma * sqrt(t / steps)))
       })
     })
-
+    
     d <- eventReactive(u(), {
       1 / u()
     })
-
+    
     p <- eventReactive(d(), {
       with(params(), {
         (exp(risk_free * (t / steps)) - d()) / (u() - d())
       })
     })
-
+    
     tree_data <- eventReactive(p(), {
       with(
         params(),
@@ -74,16 +74,16 @@ server <- function(id) {
         )
       )
     })
-
+    
     # 2 Tree Plot ---------------------------------------------------------------------------------
-
+    
     tree_plot <- eventReactive(tree_data(), {
       options$plot_tree(
         data = tree_data(),
         n    = params()$steps
       )
     })
-
+    
     output$tree_container <- renderUI({
       req(plt_size$activate)
       plotOutput(
@@ -91,8 +91,7 @@ server <- function(id) {
         height   = as.numeric(plt_size$height)
       )
     })
-    plotOutput(ns("tree"), height = 500)
-
+    
     output$tree <- renderPlot({
       validate(
         need( # change later the color to red of this validate message
@@ -102,11 +101,11 @@ server <- function(id) {
       )
       tree_plot()
     })
-
+    
     # 3 Options -----------------------------------------------------------------------------------
-
+    
     # > 1 European  ---------------------------------------------------------------------------
-
+    
     price_call <- eventReactive(tree_data(), {
       with(params(), {
         options$intermediate_nodes(
@@ -122,7 +121,7 @@ server <- function(id) {
         )
       })
     })
-
+    
     price_put <- eventReactive(tree_data(), {
       with(params(), {
         options$intermediate_nodes(
@@ -138,13 +137,37 @@ server <- function(id) {
         )
       })
     })
-
+    
     output$call <- renderUI({
       price_call() |> details_list()
     })
-
+    
     output$put <- renderUI({
       price_put() |> details_list()
     })
+    
+    # > 2 American --------------------------------------------------------------------------------
+    
+    exercise_call <- eventReactive(tree_data(), {
+      options$exercise_option(
+        data = tree_data(),
+        k    = params()$strike,
+        type = "Call"
+      )
+    })
+    
+    exercise_call <- eventReactive(tree_data(), {
+      options$exercise_option(
+        data = tree_data(),
+        k    = params()$strike,
+        type = "Put"
+      )
+    })
+    
+    
+    
   })
 }
+
+
+
