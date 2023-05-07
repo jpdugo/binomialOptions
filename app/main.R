@@ -25,11 +25,25 @@ ui <- function(id) {
       )
     ),
     br(),
-    Stack(
-      tokens = list(childrenGap = 10),
-      horizontal = TRUE,
-      card_6(title = "Call", content = uiOutput(ns("call"))),
-      card_6(title = "Put", content = uiOutput(ns("put")))
+    Pivot(
+      PivotItem(
+        headerText = "European",
+        Stack(
+          tokens = list(childrenGap = 10),
+          horizontal = TRUE,
+          card_6(title = "Call", content = uiOutput(ns("call"))),
+          card_6(title = "Put", content = uiOutput(ns("put")))
+        )
+      ),
+      PivotItem(
+        headerText = "American",
+        Stack(
+          tokens = list(childrenGap = 10),
+          horizontal = TRUE,
+          card_6(title = "Call", content = uiOutput(ns("call_american"))),
+          card_6(title = "Put", content = uiOutput(ns("put_american")))
+        )
+      )
     )
   )
 }
@@ -91,7 +105,6 @@ server <- function(id) {
         height   = as.numeric(plt_size$height)
       )
     })
-    plotOutput(ns("tree"), height = 500)
 
     output$tree <- renderPlot({
       validate(
@@ -145,6 +158,56 @@ server <- function(id) {
 
     output$put <- renderUI({
       price_put() |> details_list()
+    })
+
+    # > 2 American --------------------------------------------------------------------------------
+
+    exercise_call <- eventReactive(tree_data(), {
+      options$exercise_option(
+        data = tree_data(),
+        k    = params()$strike,
+        type = "Call"
+      )
+    })
+
+    exercise_put <- eventReactive(tree_data(), {
+      options$exercise_option(
+        data = tree_data(),
+        k    = params()$strike,
+        type = "Put"
+      )
+    })
+
+    price_american_call <- eventReactive(exercise_call(), {
+      with(params(), {
+        options$price_american_option(
+          data = exercise_call(),
+          p    = p(),
+          r    = risk_free,
+          n    = steps,
+          time = t
+        )
+      })
+    })
+
+    price_american_put <- eventReactive(exercise_put(), {
+      with(params(), {
+        options$price_american_option(
+          data = exercise_put(),
+          p    = p(),
+          r    = risk_free,
+          n    = steps,
+          time = t
+        )
+      })
+    })
+
+    output$call_american <- renderUI({
+      price_american_call() |> details_list()
+    })
+
+    output$put_american <- renderUI({
+      price_american_put() |> details_list()
     })
   })
 }
