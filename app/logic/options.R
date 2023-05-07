@@ -1,5 +1,6 @@
 box::use(
   glue[glue],
+  dplyr[...],
   graphics[...],
   purrr
 )
@@ -237,7 +238,8 @@ intermediate_nodes <- function(data, rf, time, steps, d, u, p, k, type) {
 #' This function calculates the payoff of an American call or put option using the binomial model.
 #' American options can be exercised at any time before the option's expiration.
 #'
-#' @param data \code{matrix} Output of the price_option function, representing the option prices at different time steps
+#' @param data \code{matrix} Output of the price_option function, representing the option prices at
+#' different time steps
 #' @param k \code{numeric} The strike price of the option
 #' @param call_or_put \code{character} indicating the option type: either "Call" or "Put"
 #'
@@ -263,6 +265,7 @@ exercise_option <- function(data, k, type) {
       across(
         .cols = everything(),
         .fns = \(.x) case_when(
+          is.na(.x) ~ .x,
           .x > 0 ~ .x,
           .default = 0
         )
@@ -275,7 +278,8 @@ exercise_option <- function(data, k, type) {
 #' This function calculates the price of an American call or put option using the binomial model.
 #' American options can be exercised at any time before the option's expiration.
 #'
-#' @param data \code{data.frame} The output of the exercise_option function, representing option payoffs at different time steps
+#' @param data \code{data.frame} The output of the exercise_option function,
+#' representing option payoffs at different time steps
 #' @param p \code{numeric} probability of the underlying asset's price increasing at each time step
 #' @param r \code{numeric} The risk-free interest rate, expressed as a decimal (e.g., 0.05 for 5%)
 #' @param n \code{integer} The number of time steps in the binomial model
